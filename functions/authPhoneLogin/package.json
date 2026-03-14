@@ -1,0 +1,10 @@
+{
+  "name": "authPhoneLogin",
+  "version": "1.0.0",
+  "description": "手机验证码登录",
+  "main": "index.js",
+  "dependencies": {
+    "@cloudbase/node-sdk": "^3.18.0",
+    "node-fetch": "^2.7.0"
+  }
+}

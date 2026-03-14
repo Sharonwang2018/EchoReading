@@ -1,0 +1,50 @@
+import 'dart:convert';
+
+import 'package:echo_reading/env_config.dart';
+import 'package:echo_reading/services/api_auth_service.dart';
+import 'package:http/http.dart' as http;
+
+/// Web：blob URL 转为 bytes，通过 API 上传到 PostgreSQL 后端
+Future<String> uploadAudioToCloudBase(
+  String pathOrBlobUrl,
+  String bucket,
+  String objectPath, {
+  String contentType = 'audio/mp4',
+}) async {
+  if (!EnvConfig.isConfigured) {
+    throw Exception('API 未配置。请设置 API_BASE_URL');
+  }
+  final token = await ApiAuthService.getToken();
+  if (token == null || token.isEmpty) throw Exception('请先登录');
+
+  final bytes = await _fetchBlobBytes(pathOrBlobUrl);
+  final ext = contentType.contains('webm') ? 'webm' : 'm4a';
+  final filename = 'audio_${DateTime.now().millisecondsSinceEpoch}.$ext';
+
+  final uri = Uri.parse('${EnvConfig.apiBaseUrl}/upload/audio');
+  final request = http.MultipartRequest('POST', uri);
+  request.headers['Authorization'] = 'Bearer $token';
+  request.files.add(http.MultipartFile.fromBytes(
+    'file',
+    bytes,
+    filename: filename,
+  ));
+
+  final streamed = await request.send();
+  final res = await http.Response.fromStream(streamed);
+  if (res.statusCode != 200 && res.statusCode != 201) {
+    throw Exception('上传失败: ${res.body}');
+  }
+  final json = jsonDecode(res.body) as Map<String, dynamic>;
+  final url = json['url'] as String?;
+  if (url == null || url.isEmpty) throw Exception('未获取到文件地址');
+  return url;
+}
+
+Future<List<int>> _fetchBlobBytes(String blobUrl) async {
+  final response = await http.get(Uri.parse(blobUrl));
+  if (response.statusCode != 200) {
+    throw Exception('获取录音数据失败：${response.statusCode}');
+  }
+  return response.bodyBytes;
+}

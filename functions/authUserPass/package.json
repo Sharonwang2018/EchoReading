@@ -1,0 +1,9 @@
+{
+  "name": "authUserPass",
+  "version": "1.0.0",
+  "description": "用户名密码注册/登录",
+  "main": "index.js",
+  "dependencies": {
+    "@cloudbase/node-sdk": "^3.18.0"
+  }
+}
