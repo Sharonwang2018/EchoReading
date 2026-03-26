@@ -5,8 +5,6 @@ import 'dart:ui' as ui;
 
 import 'package:echo_reading/models/book.dart';
 import 'package:echo_reading/models/read_log.dart';
-import 'package:echo_reading/env_config.dart';
-import 'package:echo_reading/services/api_service.dart';
 import 'package:echo_reading/widgets/responsive_layout.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -30,8 +28,6 @@ class ReadingJournalDetailScreen extends StatefulWidget {
 
 class _ReadingJournalDetailScreenState
     extends State<ReadingJournalDetailScreen> {
-
-  bool _isGenerating = false;
   String? _encouragement;
   int? _logicScore;
 
@@ -55,103 +51,6 @@ class _ReadingJournalDetailScreenState
         _encouragement = raw;
       });
     }
-  }
-
-  Future<void> _generateAiFeedback() async {
-    if (_isGenerating) return;
-    if ((widget.readLog.transcript ?? '').trim().isEmpty) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('当前没有可分析的复述内容。')));
-      return;
-    }
-
-    setState(() {
-      _isGenerating = true;
-    });
-
-    try {
-      final result = await _askDoubaoForFeedback(
-        transcript: widget.readLog.transcript!,
-        summary: widget.book.summary ?? '',
-      );
-
-      await ApiService.updateReadLogAiFeedback(
-        widget.readLog.id,
-        jsonEncode(result),
-      );
-
-      if (!mounted) return;
-      setState(() {
-        _encouragement = result['comment'] as String?;
-        _logicScore = (result['logic_score'] as num?)?.toInt();
-      });
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('AI 点评已生成并保存')));
-    } catch (error) {
-      if (!mounted) return;
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('生成失败：$error')));
-    } finally {
-      if (mounted) {
-        setState(() {
-          _isGenerating = false;
-        });
-      }
-    }
-  }
-
-  Future<Map<String, dynamic>> _askDoubaoForFeedback({
-    required String transcript,
-    required String summary,
-  }) async {
-    const prompt = '''
-请分析孩子的复述内容，生成一份约 100 字的点评，必须包含以下三个维度：
-1) 复述完整度：孩子是否抓住了故事要点
-2) 词汇闪光点：孩子用了哪些精彩的表达
-3) 情绪表达：孩子的情感投入与语气
-
-语气要积极、温柔、具体，适合 3-8 岁儿童。
-
-严格返回 JSON：
-{
-  "comment": "约100字的完整点评，自然融合上述三个维度",
-  "logic_score": 1-5
-}
-''';
-
-    final messages = [
-      {'role': 'system', 'content': '你是儿童阅读鼓励教练。'},
-      {
-        'role': 'user',
-        'content': '书籍概要：\n$summary\n\n孩子复述：\n$transcript\n\n$prompt',
-      },
-    ];
-    if (!EnvConfig.isConfigured) {
-      throw Exception('请配置后端 API_BASE_URL 与 ARK_* 或 OPENROUTER_API_KEY（见 docs）');
-    }
-    final content = await ApiService.chatCompletion(messages: messages, temperature: 0.7);
-
-    String raw = content.trim();
-    if (raw.startsWith('```')) {
-      final end = raw.indexOf('```', 3);
-      if (end != -1) raw = raw.substring(3, end).trim();
-      if (raw.startsWith('json')) raw = raw.substring(4).trim();
-    }
-    final result = jsonDecode(raw) as Map<String, dynamic>;
-    final comment = (result['comment'] as String?)?.trim();
-    final score = (result['logic_score'] as num?)?.toInt();
-
-    if (comment == null || comment.isEmpty) {
-      throw Exception('点评内容为空');
-    }
-    if (score == null || score < 1 || score > 5) {
-      throw Exception('评分无效');
-    }
-
-    return {'comment': comment, 'encouragement': comment, 'logic_score': score};
   }
 
   String _dateLabel(DateTime dateTime) {
@@ -271,7 +170,7 @@ class _ReadingJournalDetailScreenState
                         style: TextStyle(fontWeight: FontWeight.bold),
                       ),
                       const SizedBox(height: 8),
-                      Text(_encouragement ?? '还没有点评，点击下方按钮生成。'),
+                      Text(_encouragement ?? '暂无点评'),
                       const SizedBox(height: 10),
                       Row(
                         children: [
@@ -290,20 +189,6 @@ class _ReadingJournalDetailScreenState
                           const SizedBox(width: 6),
                           Text(_logicScore?.toString() ?? '-'),
                         ],
-                      ),
-                      const SizedBox(height: 12),
-                      FilledButton.icon(
-                        onPressed: _isGenerating ? null : _generateAiFeedback,
-                        icon: _isGenerating
-                            ? const SizedBox(
-                                width: 18,
-                                height: 18,
-                                child: CircularProgressIndicator(
-                                  strokeWidth: 2,
-                                ),
-                              )
-                            : const Icon(Icons.auto_awesome_rounded),
-                        label: Text(_isGenerating ? '生成中...' : '生成 AI 点评'),
                       ),
                     ],
                   ),

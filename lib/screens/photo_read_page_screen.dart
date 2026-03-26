@@ -3,6 +3,8 @@ import 'dart:typed_data';
 
 import 'package:echo_reading/services/page_ocr_service.dart';
 import 'package:echo_reading/services/page_tts_service.dart';
+import 'package:echo_reading/services/tip_donation_trigger.dart';
+import 'package:echo_reading/widgets/tip_donation_sheet.dart';
 import 'package:echo_reading/widgets/responsive_layout.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
@@ -145,6 +147,15 @@ class _PhotoReadPageScreenState extends State<PhotoReadPageScreen> {
           _isPlaying = true;
         }
       });
+
+      final showTip = await TipDonationTrigger.recordPhotoSuccess();
+      if (!mounted) return;
+      if (showTip) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (!mounted) return;
+          showTipDonationSheet(context);
+        });
+      }
 
       if (!kIsWeb) {
         unawaited(_speakExtractedAfterCapture(t));

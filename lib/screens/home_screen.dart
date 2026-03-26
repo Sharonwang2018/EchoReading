@@ -1,4 +1,5 @@
 import 'package:echo_reading/env_config.dart';
+import 'package:echo_reading/screens/my_read_logs_screen.dart';
 import 'package:echo_reading/screens/login_screen.dart';
 import 'package:echo_reading/services/api_auth_service.dart';
 import 'package:echo_reading/screens/photo_read_page_screen.dart';
@@ -63,12 +64,29 @@ class _HomeScreenState extends State<HomeScreen> {
                 child: PopupMenuButton<String>(
                   icon: const Icon(Icons.person_rounded),
                   onSelected: (value) async {
-                    if (value == 'logout') {
+                    if (value == 'read_logs') {
+                      await Navigator.push<void>(
+                        context,
+                        MaterialPageRoute<void>(
+                          builder: (_) => const MyReadLogsScreen(),
+                        ),
+                      );
+                    } else if (value == 'logout') {
                       await ApiAuthService.signOut();
                       _checkAuth();
                     }
                   },
                   itemBuilder: (_) => [
+                    const PopupMenuItem(
+                      value: 'read_logs',
+                      child: Row(
+                        children: [
+                          Icon(Icons.history_rounded),
+                          SizedBox(width: 8),
+                          Text('我的阅读记录'),
+                        ],
+                      ),
+                    ),
                     const PopupMenuItem(
                       value: 'logout',
                       child: Row(

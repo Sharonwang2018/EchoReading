@@ -1,13 +1,14 @@
 import { Router } from 'express';
 import FormData from 'form-data';
 import multer from 'multer';
+import { quotaPreCheck } from '../middleware/quota.js';
 
 // 使用 OpenAI Whisper（OpenRouter 不提供 ASR）
 const OPENAI_WHISPER_URL = 'https://api.openai.com/v1/audio/transcriptions';
 const router = Router();
 const upload = multer({ storage: multer.memoryStorage() });
 
-router.post('/', upload.single('file'), async (req, res, next) => {
+router.post('/', quotaPreCheck('transcribe'), upload.single('file'), async (req, res, next) => {
   try {
     const apiKey = process.env.OPENAI_API_KEY;
     if (!apiKey || !apiKey.length) {

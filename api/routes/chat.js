@@ -1,9 +1,10 @@
 import { Router } from 'express';
 import { resolveChatProvider } from '../lib/llm_providers.js';
+import { quotaPreCheck } from '../middleware/quota.js';
 
 const router = Router();
 
-router.post('/', async (req, res, next) => {
+router.post('/', quotaPreCheck('chat'), async (req, res, next) => {
   try {
     const cfg = resolveChatProvider();
     if (!cfg) {

@@ -4,6 +4,7 @@ run_app.sh
 api/certs/*.pem
 api/.env
 api/uploads/
+api/data/quota_state.json
 
 # Root tooling deps (e.g. favicon generator); use package-lock + npm ci
 /node_modules/

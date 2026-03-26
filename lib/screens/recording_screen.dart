@@ -12,6 +12,7 @@ import 'package:echo_reading/services/page_tts_audio_impl_stub.dart'
     if (dart.library.html) 'package:echo_reading/services/page_tts_audio_impl_web.dart' as tts_audio;
 import 'package:echo_reading/services/page_tts_service.dart';
 import 'package:echo_reading/services/retelling_intro_prompts.dart';
+import 'package:echo_reading/services/tip_donation_trigger.dart';
 import 'package:echo_reading/services/transcription_service.dart';
 import 'package:echo_reading/widgets/responsive_layout.dart';
 import 'package:flutter/foundation.dart' show debugPrint, kIsWeb;
@@ -264,6 +265,7 @@ class _RecordingScreenState extends State<RecordingScreen> {
     }
 
     String? comment;
+    var showDonationTip = false;
     try {
       final isRealUser = EnvConfig.isConfigured && await _hasCloudBaseUser();
       String transcript = _speechTranscript.trim();
@@ -303,6 +305,10 @@ class _RecordingScreenState extends State<RecordingScreen> {
         _transcript = transcript;
         _processing = false;
       });
+
+      if (transcript.trim().isNotEmpty) {
+        showDonationTip = await TipDonationTrigger.recordRetellingSuccess();
+      }
 
       // 仅当【已登录】且【有复述文字】时：先显示「AI老师正在审阅」→ 再弹「老师批阅」对话框（文字+语音）
       if (isRealUser && logId != null && transcript.trim().isNotEmpty) {
@@ -367,6 +373,7 @@ class _RecordingScreenState extends State<RecordingScreen> {
           builder: (_) => RetellingCompleteScreen(
             comment: comment,
             bookTitle: widget.bookTitle,
+            showDonationTip: showDonationTip,
           ),
         ),
       );
@@ -381,6 +388,7 @@ class _RecordingScreenState extends State<RecordingScreen> {
             builder: (_) => RetellingCompleteScreen(
               comment: comment,
               bookTitle: widget.bookTitle,
+              showDonationTip: showDonationTip,
             ),
           ),
         );

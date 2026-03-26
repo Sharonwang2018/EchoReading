@@ -1,9 +1,10 @@
 import { Router } from 'express';
 import { resolveVisionProvider } from '../lib/llm_providers.js';
+import { quotaPreCheck } from '../middleware/quota.js';
 
 const router = Router();
 
-router.post('/', async (req, res, next) => {
+router.post('/', quotaPreCheck('vision'), async (req, res, next) => {
   const cfg = resolveVisionProvider();
   console.log('[vision] 开始识别, provider=', cfg?.provider, 'model=', cfg?.model, 'imageSize=', req.body?.image?.length || 0);
   try {

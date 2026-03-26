@@ -6,6 +6,7 @@
  */
 import { randomUUID } from 'crypto';
 import { Router } from 'express';
+import { quotaPreCheck } from '../middleware/quota.js';
 
 const OPENAI_TTS_URL = 'https://api.openai.com/v1/audio/speech';
 const VOLC_TTS_URL = 'https://openspeech.bytedance.com/api/v1/tts';
@@ -88,7 +89,7 @@ async function synthesizeVolcTts(text) {
   return buf;
 }
 
-router.post('/', async (req, res, next) => {
+router.post('/', quotaPreCheck('tts'), async (req, res, next) => {
   const routeT0 = Date.now();
   try {
     const text = String(req.body?.text ?? '').trim();

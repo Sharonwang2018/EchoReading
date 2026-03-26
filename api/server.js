@@ -19,6 +19,7 @@ import transcribeRoutes from './routes/transcribe.js';
 import bookLookupRoutes from './routes/book_lookup.js';
 import { attachWsToServer } from './routes/asr_stream.js';
 import { resolveChatProvider, resolveVisionProvider } from './lib/llm_providers.js';
+import { quotaEnabled } from './lib/usage_quota.js';
 
 const UPLOAD_DIR = process.env.UPLOAD_DIR || path.join(__dirname, 'uploads');
 const AUDIO_DIR = path.join(UPLOAD_DIR, 'audio');
@@ -116,4 +117,9 @@ server.listen(PORT, '0.0.0.0', () => {
     : `Hi-Doo API at http://10.0.0.138:${PORT}`);
   console.log(`LLM 对话/点评: ${chat ? `${chat.provider} (${chat.model})` : '未配置'}`);
   console.log(`LLM 拍照读页: ${vision ? `${vision.provider} (${vision.model})` : '未配置'}`);
+  console.log(
+    quotaEnabled()
+      ? 'API 配额: 已启用（vision/transcribe/tts/chat 按日计次，见 .env QUOTA_*）'
+      : 'API 配额: 已关闭（QUOTA_ENABLED=0）',
+  );
 });

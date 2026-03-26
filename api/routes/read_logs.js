@@ -73,8 +73,29 @@ router.patch('/:id', authMiddleware, async (req, res, next) => {
 router.get('/', authMiddleware, async (req, res, next) => {
   try {
     const result = await query(
-      `SELECT r.id, r.user_id, r.book_id, r.audio_url, r.transcript, r.ai_feedback, r.language, r.session_type, r.created_at
+      `SELECT
+         r.id,
+         r.user_id,
+         r.book_id,
+         r.audio_url,
+         r.transcript,
+         r.ai_feedback,
+         r.language,
+         r.session_type,
+         r.created_at,
+         CASE
+           WHEN b.id IS NULL THEN NULL
+           ELSE json_build_object(
+             'id', b.id,
+             'isbn', b.isbn,
+             'title', b.title,
+             'author', b.author,
+             'cover_url', b.cover_url,
+             'summary', b.summary
+           )
+         END AS book
        FROM read_logs r
+       LEFT JOIN books b ON b.id = r.book_id
        WHERE r.user_id = $1
        ORDER BY r.created_at DESC
        LIMIT 100`,
@@ -90,6 +111,7 @@ router.get('/', authMiddleware, async (req, res, next) => {
       language: row.language,
       session_type: row.session_type,
       created_at: row.created_at,
+      book: row.book,
     })));
   } catch (e) {
     next(e);

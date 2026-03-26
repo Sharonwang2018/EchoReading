@@ -11,14 +11,16 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import 'package:share_plus/share_plus.dart';
 
+import 'package:echo_reading/widgets/tip_donation_sheet.dart';
 import 'photo_read_page_screen.dart';
 
 /// 干净结束页：展示“已记录的书”，引导保存网页（Web）/拍照打卡/再读一本
-class RetellingCompleteScreen extends StatelessWidget {
+class RetellingCompleteScreen extends StatefulWidget {
   const RetellingCompleteScreen({
     super.key,
     this.comment,
     this.bookTitle,
+    this.showDonationTip = false,
   });
 
   /// AI 点评正文；复述模式下才会有
@@ -27,18 +29,37 @@ class RetellingCompleteScreen extends StatelessWidget {
   /// 本次读取/复述的书名
   final String? bookTitle;
 
+  /// 复述成功识别次数达标时，首帧后弹出非强制性打赏说明
+  final bool showDonationTip;
+
   /// 返回到首页（避免回到书籍确认页）
   static void popToHome(BuildContext context) {
     Navigator.of(context).popUntil((route) => route.isFirst);
   }
 
+  @override
+  State<RetellingCompleteScreen> createState() => _RetellingCompleteScreenState();
+}
+
+class _RetellingCompleteScreenState extends State<RetellingCompleteScreen> {
+  @override
+  void initState() {
+    super.initState();
+    if (widget.showDonationTip) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+        showTipDonationSheet(context);
+      });
+    }
+  }
+
   Future<void> _shareComment(BuildContext context) async {
     // Web 侧：优先走文字分享（无需生成海报图片）
     if (!context.mounted) return;
-    final c = comment?.trim();
+    final c = widget.comment?.trim();
     if (c == null || c.isEmpty) return;
-    final title = (bookTitle != null && bookTitle!.isNotEmpty)
-        ? '《$bookTitle》复述点评\n\n'
+    final title = (widget.bookTitle != null && widget.bookTitle!.isNotEmpty)
+        ? '《${widget.bookTitle}》复述点评\n\n'
         : '';
     final text = '$title$c';
     try {
@@ -66,8 +87,8 @@ class RetellingCompleteScreen extends StatelessWidget {
       context: context,
       barrierDismissible: false,
       builder: (ctx) => _PosterShareDialog(
-        bookTitle: bookTitle ?? '这本书',
-        comment: comment,
+        bookTitle: widget.bookTitle ?? '这本书',
+        comment: widget.comment,
         shareUrl: _computeShareUrl(),
       ),
     );
@@ -75,8 +96,10 @@ class RetellingCompleteScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final hasComment = comment != null && comment!.trim().isNotEmpty;
-    final title = (bookTitle != null && bookTitle!.isNotEmpty) ? bookTitle!.trim() : '这本书';
+    final hasComment = widget.comment != null && widget.comment!.trim().isNotEmpty;
+    final title = (widget.bookTitle != null && widget.bookTitle!.isNotEmpty)
+        ? widget.bookTitle!.trim()
+        : '这本书';
     final recordHint = hasComment ? '复述点评已保存到阅读记录' : '阅读记录已保存';
 
     return Scaffold(
@@ -141,7 +164,7 @@ class RetellingCompleteScreen extends StatelessWidget {
                       if (hasComment) ...[
                         const SizedBox(height: 12),
                         Text(
-                          comment!.trim(),
+                          widget.comment!.trim(),
                           maxLines: 4,
                           overflow: TextOverflow.ellipsis,
                           style: Theme.of(context).textTheme.bodySmall,

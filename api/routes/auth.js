@@ -10,7 +10,7 @@ const USERNAME_RE = /^[a-zA-Z0-9][a-zA-Z0-9_.:+@-]*$/;
 
 function signToken(user) {
   return jwt.sign(
-    { userId: user.id, username: user.username },
+    { userId: user.id, username: user.username, isGuest: !!user.isGuest },
     JWT_SECRET,
     { expiresIn: '7d' }
   );
@@ -46,7 +46,7 @@ router.post('/register', async (req, res, next) => {
       [id, u, hash]
     );
 
-    const token = signToken({ id, username: u });
+    const token = signToken({ id, username: u, isGuest: false });
     res.json({ ticket: token, userId: id });
   } catch (e) {
     next(e);
@@ -74,7 +74,7 @@ router.post('/login', async (req, res, next) => {
       return res.status(401).json({ error: 'auth_failed', message: '用户名或密码错误' });
     }
 
-    const token = signToken({ id: user.id, username: user.username });
+    const token = signToken({ id: user.id, username: user.username, isGuest: false });
     res.json({ ticket: token, userId: user.id });
   } catch (e) {
     next(e);
@@ -90,7 +90,7 @@ router.post('/guest', async (req, res, next) => {
       [id, username]
     );
 
-    const token = signToken({ id, username });
+    const token = signToken({ id, username, isGuest: true });
     res.json({ ticket: token, userId: id });
   } catch (e) {
     next(e);
