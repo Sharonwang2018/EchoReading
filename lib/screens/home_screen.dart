@@ -188,7 +188,8 @@ class _HomeScreenState extends State<HomeScreen> {
               tooltip: 'Menu',
               onSelected: _onMenuSelected,
               itemBuilder: (context) => [
-                const PopupMenuItem(
+                const PopupMenuItem(value: 'contact', child: Row(children: [Icon(Icons.contact_mail_rounded), SizedBox(width: 8), Text('联系我们')])),
+                    const PopupMenuItem(
                   value: 'manual',
                   child: Row(
                     children: [
@@ -199,7 +200,8 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                 ),
                 if (EnvConfig.isConfigured)
-                  const PopupMenuItem(
+                  const PopupMenuItem(value: 'contact', child: Row(children: [Icon(Icons.contact_mail_rounded), SizedBox(width: 8), Text('联系我们')])),
+                    const PopupMenuItem(
                     value: 'journey',
                     child: Row(
                       children: [
@@ -209,7 +211,8 @@ class _HomeScreenState extends State<HomeScreen> {
                       ],
                     ),
                   ),
-                const PopupMenuItem(
+                const PopupMenuItem(value: 'contact', child: Row(children: [Icon(Icons.contact_mail_rounded), SizedBox(width: 8), Text('联系我们')])),
+                    const PopupMenuItem(
                   value: 'about',
                   child: Row(
                     children: [
@@ -221,6 +224,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
                 if (EnvConfig.isConfigured)
                   if (_isLoggedIn)
+                    const PopupMenuItem(value: 'contact', child: Row(children: [Icon(Icons.contact_mail_rounded), SizedBox(width: 8), Text('联系我们')])),
                     const PopupMenuItem(
                       value: 'logout',
                       child: Row(
@@ -232,6 +236,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       ),
                     )
                   else
+                    const PopupMenuItem(value: 'contact', child: Row(children: [Icon(Icons.contact_mail_rounded), SizedBox(width: 8), Text('联系我们')])),
                     const PopupMenuItem(
                       value: 'signin',
                       child: Row(
