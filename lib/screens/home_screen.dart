@@ -1,5 +1,6 @@
 import 'package:echo_reading/env_config.dart';
 import 'package:echo_reading/models/book.dart';
+import 'package:echo_reading/screens/learning_path_screen.dart';
 import 'package:echo_reading/screens/my_read_logs_screen.dart';
 import 'package:echo_reading/screens/login_screen.dart';
 import 'package:echo_reading/services/api_auth_service.dart';
@@ -133,6 +134,13 @@ class _HomeScreenState extends State<HomeScreen> {
       case 'journey':
         await _openJourney();
         break;
+      case 'learning_path':
+        if (!mounted) break;
+        await Navigator.push<void>(
+          context,
+          MaterialPageRoute<void>(builder: (_) => const LearningPathScreen()),
+        );
+        break;
       case 'about':
         WidgetsBinding.instance.addPostFrameCallback((_) {
           if (mounted) showScanAboutSheet(context);
@@ -187,21 +195,19 @@ class _HomeScreenState extends State<HomeScreen> {
               icon: const Icon(Icons.more_vert_rounded),
               tooltip: 'Menu',
               onSelected: _onMenuSelected,
-              itemBuilder: (context) => [
-                const PopupMenuItem(value: 'contact', child: Row(children: [Icon(Icons.contact_mail_rounded), SizedBox(width: 8), Text('联系我们')])),
-                    const PopupMenuItem(
-                  value: 'manual',
-                  child: Row(
-                    children: [
-                      Icon(Icons.keyboard_alt_outlined, size: 22),
-                      SizedBox(width: 10),
-                      Text('Enter ISBN manually'),
-                    ],
+              itemBuilder: (context) {
+                return <PopupMenuEntry<String>>[
+                  const PopupMenuItem(
+                    value: 'manual',
+                    child: Row(
+                      children: [
+                        Icon(Icons.keyboard_alt_outlined, size: 22),
+                        SizedBox(width: 10),
+                        Text('Enter ISBN manually'),
+                      ],
+                    ),
                   ),
-                ),
-                if (EnvConfig.isConfigured)
-                  const PopupMenuItem(value: 'contact', child: Row(children: [Icon(Icons.contact_mail_rounded), SizedBox(width: 8), Text('联系我们')])),
-                    const PopupMenuItem(
+                  const PopupMenuItem(
                     value: 'journey',
                     child: Row(
                       children: [
@@ -211,43 +217,51 @@ class _HomeScreenState extends State<HomeScreen> {
                       ],
                     ),
                   ),
-                const PopupMenuItem(value: 'contact', child: Row(children: [Icon(Icons.contact_mail_rounded), SizedBox(width: 8), Text('联系我们')])),
+                  if (EnvConfig.isConfigured)
                     const PopupMenuItem(
-                  value: 'about',
-                  child: Row(
-                    children: [
-                      Icon(Icons.info_outline_rounded, size: 22),
-                      SizedBox(width: 10),
-                      Text('About & privacy'),
-                    ],
-                  ),
-                ),
-                if (EnvConfig.isConfigured)
-                  if (_isLoggedIn)
-                    const PopupMenuItem(value: 'contact', child: Row(children: [Icon(Icons.contact_mail_rounded), SizedBox(width: 8), Text('联系我们')])),
-                    const PopupMenuItem(
-                      value: 'logout',
+                      value: 'learning_path',
                       child: Row(
                         children: [
-                          Icon(Icons.logout_rounded, size: 22),
+                          Icon(Icons.auto_graph_rounded, size: 22),
                           SizedBox(width: 10),
-                          Text('Sign out'),
-                        ],
-                      ),
-                    )
-                  else
-                    const PopupMenuItem(value: 'contact', child: Row(children: [Icon(Icons.contact_mail_rounded), SizedBox(width: 8), Text('联系我们')])),
-                    const PopupMenuItem(
-                      value: 'signin',
-                      child: Row(
-                        children: [
-                          Icon(Icons.login_rounded, size: 22),
-                          SizedBox(width: 10),
-                          Text('Sign in'),
+                          Text('Learning path & tiers'),
                         ],
                       ),
                     ),
-              ],
+                  const PopupMenuItem(
+                    value: 'about',
+                    child: Row(
+                      children: [
+                        Icon(Icons.info_outline_rounded, size: 22),
+                        SizedBox(width: 10),
+                        Text('About & privacy'),
+                      ],
+                    ),
+                  ),
+                  if (EnvConfig.isConfigured)
+                    _isLoggedIn
+                        ? const PopupMenuItem(
+                            value: 'logout',
+                            child: Row(
+                              children: [
+                                Icon(Icons.logout_rounded, size: 22),
+                                SizedBox(width: 10),
+                                Text('Sign out'),
+                              ],
+                            ),
+                          )
+                        : const PopupMenuItem(
+                            value: 'signin',
+                            child: Row(
+                              children: [
+                                Icon(Icons.login_rounded, size: 22),
+                                SizedBox(width: 10),
+                                Text('Sign in'),
+                              ],
+                            ),
+                          ),
+                ];
+              },
             ),
           ),
         ],

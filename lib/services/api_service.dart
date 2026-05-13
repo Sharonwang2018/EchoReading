@@ -103,6 +103,19 @@ class ApiService {
     );
   }
 
+  /// 产品闭环与商业化说明（公开接口，无需登录）
+  static Future<Map<String, dynamic>> fetchProductManifest() async {
+    _checkConfigured();
+    final uri = Uri.parse('${EnvConfig.apiBaseUrl}/api/product/manifest');
+    final res = await http
+        .get(uri, headers: await _headers(withAuth: false))
+        .timeout(const Duration(seconds: 12));
+    if (res.statusCode != 200) {
+      throw Exception('manifest ${res.statusCode}');
+    }
+    return jsonDecode(res.body) as Map<String, dynamic>;
+  }
+
   /// 创建或更新书籍
   static Future<Book> upsertBook(BookLookupResult lookup) async {
     _checkConfigured();

@@ -17,6 +17,7 @@ import assessmentRoutes from './routes/assessment.js';
 import transcribeRoutes from './routes/transcribe.js';
 import bookLookupRoutes from './routes/book_lookup.js';
 import quizReportsRoutes from './routes/quiz_reports.js';
+import productRoutes from './routes/product.js';
 import { attachWsToServer } from './routes/asr_stream.js';
 import { resolveChatProvider } from './lib/llm_providers.js';
 import { quotaEnabled } from './lib/usage_quota.js';
@@ -55,6 +56,7 @@ app.use('/api/assessment', assessmentRoutes);
 app.use('/api/transcribe', transcribeRoutes);
 app.use('/api/book-lookup', bookLookupRoutes);
 app.use('/api/quiz-reports', quizReportsRoutes);
+app.use('/api/product', productRoutes);
 // Serve uploaded audio files
 if (!fs.existsSync(AUDIO_DIR)) fs.mkdirSync(AUDIO_DIR, { recursive: true });
 app.use('/audio', express.static(AUDIO_DIR));

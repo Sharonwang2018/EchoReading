@@ -29,5 +29,8 @@ class RetellingIntroPrompts {
     'Who do you like best in this book? Tell us about them!',
     'What happened to the main character in the end? You tell us!',
     'Just tell us something from the book that was fun, sad, or really cool.',
+    'Pick a day this week to act out the story with your family—who will be the main character first?',
+    'Try reading your favorite sentence aloud like a little announcer—how did it feel?',
+    'Was this book just right for your grade? Which page would you like to read again?',
   ];
 }

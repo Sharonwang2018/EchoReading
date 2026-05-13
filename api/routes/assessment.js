@@ -32,6 +32,7 @@ Rules:
 - Do NOT scold or list mistakes. Stay positive and conversational (2–5 short sentences total, easy to read aloud).
 - You may use the book summary only as quiet context; focus feedback on what the child actually said.
 - Do not cite standard numbers or say "Common Core" in the reply—keep it natural for a child and family.
+- You may end with one extra short line: a single open-ended question (not yes/no) a parent or teacher could ask next time.
 
 Return ONLY valid JSON:
 {"comment":"<your listener response>","logic_score":<integer 1-5>}
